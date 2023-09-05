@@ -286,15 +286,18 @@ function load_ad()
     return $res['data'];
 }
 
-//获取QQ昵称
-function get_qq_nick($qq)
-{
-    $get_info = httpGet('https://api.usuuu.com/qq/' . $qq);
-    $name = json_decode($get_info,true);
-    if (!isset($name)) return '获取失败！';
-    $name = $name['data']['name'];
-    return $name;
-}
+    //获取QQ昵称
+    function get_qq_nick($qq)
+    {
+        $response = httpGet('https://v.api.aa1.cn/api/qqnicheng/index.php?qq=' . $qq);
+        
+        if (strpos($response, 'QQ昵称：') === false) return '获取失败！';
+        
+        $nickname = str_replace('QQ昵称：', '', $response);
+        $nickname = str_replace('<br/><br/>', '', $nickname); 
+        
+        return trim($nickname);
+    }
 
 //检测更新
 function check_version()
