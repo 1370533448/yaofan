@@ -148,21 +148,6 @@ $order = Db("SELECT * FROM yyhy_order ORDER BY trade_no DESC LIMIT $start_from, 
         </div>
     </div>
    
-        
-        
-        
-        
-    </div>
-    <?php
-    if (config('music_sw') == 'on') {
-        echo <<<EOF
-<audio autoplay="autoplay">
-    <source src="/v50.mp3" type="audio/mp3"/>
-</audio>
-EOF;
-    }
-    ?>
-
  
  
 <script>
