@@ -43,11 +43,51 @@ if (isset($data['msg']) && !empty($data['msg'])) {
     $order = $order[0];
     yyhy_json(['code' => 1, 'msg' => $order['msg']]);
 }
-$order = Db('select * from yyhy_order order by trade_no desc limit 10');
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$per_page = 10; // 每页显示的数量
+
+$start_from = ($page-1) * $per_page;
+
+$order = Db("SELECT * FROM yyhy_order ORDER BY trade_no DESC LIMIT $start_from, $per_page"); 
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
+      <style>
+      
+      .pagination {
+    display: flex !important;
+    justify-content: center !important; /* 或者使用 'flex-end' 将链接靠右显示 */
+}
+ .pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.pagination a {
+  color: #333;
+  padding: 5px 7px;
+  margin: 0 5px;
+  text-decoration: none;
+  border: 1px solid #ddd;
+}
+
+.pagination a:hover {
+  background-color: #f0f0f0;
+}
+
+.pagination a.active {
+    color: white;
+    background: linear-gradient(to right, #32cd32, #20b2aa); /* 绿色到蓝绿色的渐变 */
+}
+
+
+
+    </style>
     <title><?php echo config('sitename'); ?> - <?php echo config('title'); ?></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.9">
@@ -58,7 +98,10 @@ $order = Db('select * from yyhy_order order by trade_no desc limit 10');
     <div class="col-xs-12 col-sm-10 col-lg-8 center-block" style="float: none;">
         <div class="panel panel-primary">
             <div class="panel-heading" style="background: linear-gradient(to right,#8ae68a,#5ccdde,#b221ff);">
-                <center><font color="#000000"><b><?php echo config('panel'); ?></b></font></center>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <center><font color="#000000"><b><?php echo config('panel'); ?></b></font></center>
+                    <button onclick="location.href = 'log.php'" style="background-color:#14b7ff; color:white; border:none; padding:5px 10px;">查看大佬们的打赏记录</button>
+                </div>
             </div>
             <div class="panel-body">
                 <center>
@@ -66,29 +109,29 @@ $order = Db('select * from yyhy_order order by trade_no desc limit 10');
                         <a href="http://wpa.qq.com/msgrd?v=3&uin=<?php echo config('qq'); ?>&site=qq&menu=yes">
                             <img class="img-circle"
                                  style="border: 2px solid #1281FF; margin-left:3px; margin-right:3px;"
-                                 src="https://q4.qlogo.cn/headimg_dl?dst_uin=<?php echo config('qq'); ?>&spec=640"
+                                 src="/V50.jpg"
                                  width="60px" height="60px" alt="<?php echo config('sitename'); ?>">
                         </a><br>
                         <?php echo config('gg'); ?>
                     </div>
                 </center>
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="icon-ghost"></i> 您的QQ</span>
-                    <input name="qq" class="form-control" placeholder="请输入您的QQ以便于联系">
+                    <span class="input-group-addon"><i class="icon-ghost"></i>您的QQ</span>
+                    <input name="qq" class="form-control" placeholder="留下QQ让我知道你是谁！">
                 </div>
                 <br/>
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="icon-envelope"></i> 您的留言</span>
-                    <textarea class="form-control" name="msg" cols="30" rows="3" placeholder="请输入您的施舍留言"></textarea>
+                    <span class="input-group-addon"><i class="icon-envelope"></i>您的留言</span>
+                    <textarea class="form-control" name="msg" cols="30" rows="3" placeholder="V完之后有什么想说的话吗？"></textarea>
                 </div>
                 <br/>
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="icon-cup"></i> 施舍金额</span>
-                    <input name="money" class="form-control" placeholder="请输入您要施舍的金额">
+                    <span class="input-group-addon"><i class="icon-cup"></i>V我多少？</span>
+                    <input name="money" class="form-control" placeholder="V50V50V50V50V50V50V50">
                 </div>
                 <br/>
                 <center>
-                    <div class="alert alert-warning">选择一种方式进行施舍...</div>
+                    <div class="alert alert-warning">选择一种方式狠狠的羞辱我...</div>
                     <div class="btn-group btn-group-justified" role="group" aria-label="...">
                         <div class="btn-group" role="group">
                             <button onclick="pay('alipay')" class="btn btn-primary">支付宝</button>
@@ -104,48 +147,36 @@ $order = Db('select * from yyhy_order order by trade_no desc limit 10');
             </div>
         </div>
     </div>
-    <div class="col-xs-12 col-sm-10 col-lg-8 center-block" style="float: none;">
-        <div class="panel panel-primary">
-            <div class="panel-heading" style="background: linear-gradient(to right,#b221ff,#14b7ff,#8ae68a);">
-                <center><font color="#000000"><b><i class="icon-heart" style="color:red"></i> 大佬们的施舍记录</b></font>
-                </center>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>QQ/昵称</th>
-                        <th>施舍方式/金额</th>
-                        <th>ip/城市</th>
-                        <th>留言</th>
-                        <th>施舍时间/完成时间</th>
-                        <th>状态</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php echo ss_list($order); ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <center>
-            <p style="text-align:center"><br>&copy; Powered by <a href="/"><?php echo config('copy'); ?></a>!</p>
-        </center>
+   
+        
+        
+        
+        
     </div>
     <?php
     if (config('music_sw') == 'on') {
         echo <<<EOF
 <audio autoplay="autoplay">
-    <source src="/Static/music/yaofan.mp3" type="audio/mp3"/>
+    <source src="/v50.mp3" type="audio/mp3"/>
 </audio>
 EOF;
     }
     ?>
 
+ 
+ 
+<script>
+// 
+document.addEventListener('click', function() {
+    document.getElementById('audios').play()
+})
+ 
+</script>
     <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="/Static/js/layer.js"></script>
     <script>
+    
         function pay(type) {
             layer.open({
                 type: 2,
@@ -196,6 +227,8 @@ EOF;
                 }
             });
         }
+        
+        
 
         function msg(trade_no) {
             layer.open({
